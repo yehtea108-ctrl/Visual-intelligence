@@ -2,153 +2,199 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Visual Intelligence</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Apple Visual Intelligence</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { user-select: none; -webkit-user-select: none; }
-        body { background-color: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; overflow: hidden; height: 100vh; width: 100vw; }
-        
-        /* 蘋果原版玻璃膠囊 (Pill) */
-        .apple-pill {
-            background: rgba(40, 40, 45, 0.65);
-            backdrop-filter: blur(30px) saturate(180%);
-            -webkit-backdrop-filter: blur(30px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
-        /* 蘋果原版毛玻璃按鈕 */
-        .glass-btn-apple {
-            background: rgba(255, 255, 255, 0.18);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-        }
-
-        /* 經典主快門雙環設計 */
-        .shutter-outer {
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.85);
-            box-shadow: 0 0 25px rgba(255, 255, 255, 0.35);
-        }
-
-        /* Siri 彩光流動微光邊框 */
-        .siri-glow {
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
             position: relative;
         }
-        .siri-glow::before {
+
+        /* Apple Intelligence 螢幕外圍邊框流動彩光動畫 (Edge Aura) */
+        .apple-edge-glow {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 40;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            box-shadow: inset 0 0 35px 8px rgba(56, 189, 248, 0.6),
+                        inset 0 0 60px 20px rgba(168, 85, 247, 0.5),
+                        inset 0 0 90px 35px rgba(236, 72, 153, 0.4);
+            animation: auraPulse 2s infinite alternate ease-in-out;
+        }
+
+        .apple-edge-glow.active {
+            opacity: 1;
+        }
+
+        @keyframes auraPulse {
+            0% {
+                box-shadow: inset 0 0 30px 6px rgba(56, 189, 248, 0.7),
+                            inset 0 0 50px 15px rgba(168, 85, 247, 0.5),
+                            inset 0 0 80px 30px rgba(236, 72, 153, 0.4);
+            }
+            100% {
+                box-shadow: inset 0 0 45px 12px rgba(56, 189, 248, 0.9),
+                            inset 0 0 75px 25px rgba(168, 85, 247, 0.7),
+                            inset 0 0 110px 45px rgba(236, 72, 153, 0.6);
+            }
+        }
+
+        /* 蘋果原版懸浮玻璃膠囊 (Pill Card) */
+        .apple-pill-card {
+            background: rgba(30, 30, 35, 0.65);
+            backdrop-filter: blur(35px) saturate(200%);
+            -webkit-backdrop-filter: blur(35px) saturate(200%);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        /* Siri 彩光邊框 */
+        .siri-pill-border::before {
             content: '';
             position: absolute;
-            inset: -2px;
+            inset: -1.5px;
             border-radius: 9999px;
-            background: linear-gradient(45deg, #00f2fe, #4facfe, #a855f7, #ec4899);
+            background: linear-gradient(90deg, #38bdf8, #a855f7, #ec4899, #38bdf8);
             background-size: 300% 300%;
             z-index: -1;
-            animation: siriGlowAnim 5s ease infinite;
-            opacity: 0.8;
-            filter: blur(4px);
+            animation: siriBorderFlow 4s linear infinite;
+            opacity: 0.85;
+            filter: blur(3px);
         }
-        @keyframes siriGlowAnim {
+
+        @keyframes siriBorderFlow {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
 
-        /* 掃描雷射光束 */
-        .laser-sweep {
-            background: linear-gradient(180deg, transparent, rgba(56, 189, 248, 0.7), transparent);
-            box-shadow: 0 0 15px #38bdf8;
-            animation: scanLaser 2s infinite ease-in-out;
+        /* 蘋果原版毛玻璃圖示按鈕 */
+        .glass-btn-apple {
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.32);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            transition: transform 0.15s ease, background 0.15s ease;
         }
-        @keyframes scanLaser {
-            0% { top: 0%; opacity: 0; }
-            20% { opacity: 1; }
-            80% { opacity: 1; }
-            100% { top: 100%; opacity: 0; }
+
+        .glass-btn-apple:active {
+            transform: scale(0.90);
+            background: rgba(255, 255, 255, 0.35);
+        }
+
+        /* 中央雙環快門 */
+        .shutter-outer-ring {
+            background: rgba(255, 255, 255, 0.22);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.35);
+            transition: transform 0.15s ease;
+        }
+
+        .shutter-outer-ring:active {
+            transform: scale(0.88);
         }
     </style>
 </head>
-<body class="relative flex flex-col justify-between">
+<body class="flex flex-col justify-between">
 
-    <!-- 相機背景與掃描層 -->
+    <!-- Apple Intelligence 外圍彩光動態效果 -->
+    <div id="appleEdgeGlow" class="apple-edge-glow"></div>
+
+    <!-- 全螢幕相機畫面與底部暗色漸層遮罩 -->
     <div class="absolute inset-0 z-0 overflow-hidden">
         <video id="cameraStream" autoplay playsinline class="w-full h-full object-cover"></video>
-        <div class="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/70 pointer-events-none"></div>
-        <div id="laserScan" class="hidden absolute left-0 right-0 h-16 laser-sweep z-10 pointer-events-none"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/80 pointer-events-none"></div>
     </div>
 
-    <!-- 隱藏檔案上傳 -->
+    <!-- 隱藏式照片選擇器 -->
     <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
 
-    <!-- 頂部極簡留空 (避開動態島) -->
-    <div class="relative z-20 pt-14 px-6 flex justify-end">
+    <!-- 頂部極簡控制按鈕 (右上角齒輪設定) -->
+    <div class="relative z-30 pt-12 px-6 flex justify-end">
         <button onclick="openSettings()" class="w-9 h-9 rounded-full glass-btn-apple flex items-center justify-center text-white/80">
             <i class="fa-solid fa-gear text-sm"></i>
         </button>
     </div>
 
-    <!-- 訊息固定在控制鈕正上方 (絕不遮擋瀏海、不留白) -->
-    <div class="relative z-20 flex flex-col items-center pb-6 px-6 mt-auto">
-        <div id="aiStatusPill" onclick="captureAndAnalyze()" class="siri-glow apple-pill px-6 py-3 rounded-full text-white text-sm font-medium flex items-center space-x-2.5 shadow-2xl cursor-pointer active:scale-95 transition-all">
-            <span class="text-emerald-400">🍃</span>
+    <!-- 蘋果原版對話訊息卡片 (固定在控制按鈕正上方) -->
+    <div class="relative z-30 flex flex-col items-center pb-5 px-6 mt-auto">
+        <div id="aiStatusPill" onclick="captureAndAnalyze()" class="siri-pill-border apple-pill-card px-6 py-3 rounded-full text-white text-sm font-medium flex items-center space-x-2.5 shadow-2xl cursor-pointer active:scale-95 transition-all">
+            <span id="pillIcon" class="text-cyan-300"><i class="fa-solid fa-sparkles"></i></span>
             <span id="pillText" class="tracking-wide">點擊快門開始辨識</span>
         </div>
     </div>
 
-    <!-- 底部 Apple 原版經典控制列 (Ask / Shutter / Search) -->
-    <div class="relative z-25 pb-10 px-10 flex items-center justify-between max-w-sm mx-auto w-full">
-        <!-- 左側 Ask (詢問) -->
-        <button onclick="showAskPrompt()" class="flex flex-col items-center space-y-1 group">
+    <!-- 底部 Apple 原版經典三鍵佈局 (詢問 / 快門 / 搜尋) -->
+    <div class="relative z-30 pb-10 px-10 flex items-center justify-between max-w-sm mx-auto w-full">
+        <!-- 左側：詢問 (Ask) -->
+        <button onclick="showAskPrompt()" class="flex flex-col items-center space-y-1.5 group">
             <div class="w-14 h-14 rounded-full glass-btn-apple flex items-center justify-center text-white text-xl shadow-lg">
-                <i class="fa-regular fa-comment"></i>
+                <i class="fa-regular fa-comment-dots"></i>
             </div>
-            <span class="text-[11px] text-white/90 font-medium tracking-wide">Ask</span>
+            <span class="text-[12px] text-white/90 font-medium tracking-wide">詢問</span>
         </button>
 
-        <!-- 中央快門按鈕 -->
-        <button onclick="captureAndAnalyze()" class="relative w-20 h-20 rounded-full shutter-outer flex items-center justify-center p-1.5 active:scale-90 transition-transform duration-200 shadow-2xl">
+        <!-- 中央：主快門按鈕 -->
+        <button onclick="captureAndAnalyze()" class="relative w-20 h-20 rounded-full shutter-outer-ring flex items-center justify-center p-1.5 shadow-2xl">
             <div class="w-full h-full rounded-full bg-white/95 shadow-inner flex items-center justify-center">
-                <div class="w-6 h-6 rounded-full bg-gradient-to-tr from-cyan-400 to-purple-500"></div>
+                <div class="w-6 h-6 rounded-full bg-gradient-to-tr from-cyan-400 via-purple-500 to-pink-500"></div>
             </div>
         </button>
 
-        <!-- 右側 Search (搜尋) -->
-        <button onclick="document.getElementById('fileInput').click()" class="flex flex-col items-center space-y-1 group">
+        <!-- 右側：搜尋 (Search) -->
+        <button onclick="document.getElementById('fileInput').click()" class="flex flex-col items-center space-y-1.5 group">
             <div class="w-14 h-14 rounded-full glass-btn-apple flex items-center justify-center text-white text-xl shadow-lg">
-                <i class="fa-regular fa-image"></i>
+                <i class="fa-solid fa-magnifying-glass"></i>
             </div>
-            <span class="text-[11px] text-white/90 font-medium tracking-wide">Search</span>
+            <span class="text-[12px] text-white/90 font-medium tracking-wide">搜尋</span>
         </button>
     </div>
 
-    <!-- 設定視窗 -->
-    <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-center justify-center p-6">
-        <div class="apple-pill bg-gray-900/90 w-full max-w-md rounded-3xl p-6 border border-white/20 space-y-4">
+    <!-- 設定選單 (Modal) -->
+    <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-2xl flex items-center justify-center p-6">
+        <div class="apple-pill-card bg-gray-900/90 w-full max-w-md rounded-3xl p-6 border border-white/20 space-y-4">
             <div class="flex items-center justify-between pb-2 border-b border-white/10">
                 <h2 class="text-base font-bold text-white">API 設定</h2>
-                <button onclick="closeSettings()" class="text-white/60 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="closeSettings()" class="text-white/60 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div>
-                <label class="text-xs text-cyan-300 block mb-1">Gemini API Key</label>
-                <input type="password" id="apiKeyInput" class="w-full bg-black/50 border border-white/20 rounded-2xl px-4 py-3 text-white text-sm focus:outline-none focus:border-cyan-400">
+                <label class="text-xs text-cyan-300 block mb-1">Google Gemini API Key</label>
+                <input type="password" id="apiKeyInput" class="w-full bg-black/60 border border-white/20 rounded-2xl px-4 py-3 text-white text-sm focus:outline-none focus:border-cyan-400">
             </div>
-            <button onclick="saveSettings()" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl font-semibold text-white shadow-lg">儲存</button>
+            <button onclick="saveSettings()" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl font-semibold text-white shadow-lg">儲存變更</button>
         </div>
     </div>
 
     <script>
-        // 預先載入指定金鑰[span_2](start_span)[span_2](end_span)[span_3](start_span)[span_3](end_span)
+        // 預先載入指定的 API 金鑰[span_3](start_span)[span_3](end_span)[span_4](start_span)[span_4](end_span)
         const PRESET_API_KEY = "AIzaSyCllR8IawGzKygvrrZj8IbfszV0Mi9vjyo";
         if (!localStorage.getItem('gemini_api_key')) {
             localStorage.setItem('gemini_api_key', PRESET_API_KEY);
         }
 
+        // 開啟環境相機
         navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
             .then(stream => { document.getElementById('cameraStream').srcObject = stream; })
-            .catch(err => { console.log("相機未啟動"); });
+            .catch(err => { console.log("無法啟動相機"); });
 
         function openSettings() {
             document.getElementById('apiKeyInput').value = localStorage.getItem('gemini_api_key') || PRESET_API_KEY;
@@ -159,7 +205,7 @@
             const val = document.getElementById('apiKeyInput').value.trim();
             localStorage.setItem('gemini_api_key', val || PRESET_API_KEY);
             closeSettings();
-            alert('已儲存！');
+            alert('設定已儲存！');
         }
 
         function showAskPrompt() {
@@ -167,11 +213,14 @@
             if (userText) captureAndAnalyze(userText);
         }
 
+        // 拍照與視覺辨識
         async function captureAndAnalyze(customPrompt = null) {
             const apiKey = localStorage.getItem('gemini_api_key') || PRESET_API_KEY;
 
-            document.getElementById('laserScan').classList.remove('hidden');
-            document.getElementById('pillText').innerText = '辨識中...';
+            // 啟動 Apple Intelligence 外圍彩光動畫
+            document.getElementById('appleEdgeGlow').classList.add('active');
+            document.getElementById('pillText').innerText = '分析中...';
+            document.getElementById('pillIcon').innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i>`;
 
             const video = document.getElementById('cameraStream');
             const canvas = document.createElement('canvas');
@@ -189,8 +238,9 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            document.getElementById('laserScan').classList.remove('hidden');
+            document.getElementById('appleEdgeGlow').classList.add('active');
             document.getElementById('pillText').innerText = '讀取相片中...';
+            document.getElementById('pillIcon').innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i>`;
 
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -199,8 +249,9 @@
             reader.readAsDataURL(file);
         }
 
+        // 送出 API 請求 (對齊捷徑對應之端點)[span_5](start_span)[span_5](end_span)
         async function sendToGemini(base64Image, apiKey, customPrompt) {
-            const promptText = customPrompt || "請用繁體中文簡短回答（例如：Maybe: 合掌芋 或 這是合掌芋）";
+            const promptText = customPrompt || "請用繁體中文簡短辨識（例：可能是：合掌芋 或 這是合掌芋）";
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${apiKey}`;
 
             try {
@@ -218,19 +269,25 @@
                 });
 
                 const data = await response.json();
-                document.getElementById('laserScan').classList.add('hidden');
+                
+                // 關閉外圍彩光
+                document.getElementById('appleEdgeGlow').classList.remove('active');
 
                 if (data.candidates && data.candidates[0].content) {
                     const text = data.candidates[0].content.parts[0].text;
                     document.getElementById('pillText').innerText = text;
+                    document.getElementById('pillIcon').innerHTML = `<i class="fa-solid fa-sparkles"></i>`;
                 } else if (data.error) {
                     document.getElementById('pillText').innerText = '錯誤: ' + data.error.message;
+                    document.getElementById('pillIcon').innerHTML = `<i class="fa-solid fa-circle-exclamation text-amber-400"></i>`;
                 } else {
-                    document.getElementById('pillText').innerText = '無法辨識';
+                    document.getElementById('pillText').innerText = '無法辨識內容';
+                    document.getElementById('pillIcon').innerHTML = `<i class="fa-solid fa-circle-exclamation text-amber-400"></i>`;
                 }
             } catch (err) {
-                document.getElementById('laserScan').classList.add('hidden');
-                document.getElementById('pillText').innerText = '連線失敗';
+                document.getElementById('appleEdgeGlow').classList.remove('active');
+                document.getElementById('pillText').innerText = '連線失敗，請檢查網路';
+                document.getElementById('pillIcon').innerHTML = `<i class="fa-solid fa-wifi"></i>`;
                 console.error(err);
             }
         }
