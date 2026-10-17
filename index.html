@@ -15,31 +15,36 @@
         * { user-select: none; -webkit-user-select: none; box-sizing: border-box; margin: 0; padding: 0; }
         body { background-color: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", sans-serif; overflow: hidden; height: 100vh; width: 100vw; position: relative; }
 
-        /* 蘋果 Visual Intelligence 經典 Siri 炫彩流光膠囊 */
+        /* 蘋果 Visual Intelligence 經典膠囊與展開檢視視窗 */
         .apple-pill-card {
-            background: rgba(35, 35, 40, 0.75);
+            background: rgba(35, 35, 40, 0.82);
             backdrop-filter: blur(35px) saturate(200%);
             -webkit-backdrop-filter: blur(35px) saturate(200%);
             border: 1px solid rgba(255, 255, 255, 0.28);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
             position: relative;
-            max-width: 90vw;
-            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            width: 90vw;
+            max-width: 420px;
+            border-radius: 9999px;
+            /* 60Hz 絲滑過渡動畫 */
+            transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+            max-height: 52px;
+            overflow: hidden;
         }
+
+        /* 展開狀態 */
+        .apple-pill-card.expanded {
+            border-radius: 28px !important;
+            max-height: 48vh;
+            padding-bottom: 12px;
+        }
+
         .siri-pill-border::before {
-            content: ''; position: absolute; inset: -1.5px; border-radius: 9999px;
+            content: ''; position: absolute; inset: -1.5px; border-radius: inherit;
             background: linear-gradient(90deg, #38bdf8, #a855f7, #ec4899, #38bdf8);
             background-size: 300% 300%; z-index: -1; animation: siriBorderFlow 4s linear infinite; opacity: 0.85; filter: blur(3px);
         }
         @keyframes siriBorderFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-
-        /* 展開抽屜效果 (往上滑動展開) */
-        .apple-pill-card.expanded {
-            border-radius: 28px !important;
-            padding: 20px !important;
-            max-height: 50vh;
-            overflow-y: auto;
-        }
 
         /* 蘋果毛玻璃圓形按鈕 */
         .glass-btn-apple {
@@ -54,7 +59,7 @@
 
         /* 中央快門按鈕 */
         .shutter-outer {
-            width: 82px; height: 82px; border-radius: 9999px;
+            width: 80px; height: 80px; border-radius: 9999px;
             background: rgba(255, 255, 255, 0.2);
             border: 2px solid rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(15px);
@@ -64,50 +69,22 @@
         }
         .shutter-outer:active { transform: scale(0.9); }
         .shutter-inner {
-            width: 64px; height: 64px; border-radius: 9999px;
+            width: 62px; height: 62px; border-radius: 9999px;
             background: radial-gradient(circle, #f3f4f6 0%, #9ca3af 100%);
             box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.8), 0 3px 8px rgba(0, 0, 0, 0.3);
         }
 
-        /* 影片中的 iOS 黃色專業相機變焦轉盤風格 */
+        /* 影片中的 iOS 黃色專業相機變焦轉盤 */
         .zoom-dial-container {
-            position: relative;
-            width: 100%;
-            overflow-x: auto;
-            white-space: nowrap;
-            scrollbar-width: none;
-            padding: 8px 0;
+            position: relative; width: 100%; overflow-x: auto; white-space: nowrap; scrollbar-width: none; padding: 6px 0;
         }
         .zoom-dial-container::-webkit-scrollbar { display: none; }
-        .zoom-dial-track {
-            display: inline-flex;
-            align-items: center;
-            space-x: 16px;
-            padding: 0 50vw;
-        }
-        .zoom-tick {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            padding: 0 12px;
-            transition: transform 0.2s ease;
-        }
-        .zoom-tick span {
-            font-size: 13px;
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.5);
-            transition: color 0.2s ease, font-weight 0.2s ease;
-        }
-        .zoom-tick.active span {
-            color: #facc15; /* iOS 黃色 */
-            font-weight: 700;
-            transform: scale(1.15);
-        }
-        .zoom-tick .dot {
-            width: 4px; height: 4px; background: rgba(255, 255, 255, 0.4); border-radius: 50%; margin-top: 4px;
-        }
-        .zoom-tick.active .dot { background: #facc15; width: 6px; height: 6px; }
+        .zoom-dial-track { display: inline-flex; align-items: center; padding: 0 50vw; }
+        .zoom-tick { display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 0 14px; transition: transform 0.2s ease; }
+        .zoom-tick span { font-size: 12px; font-weight: 500; color: rgba(255, 255, 255, 0.5); transition: color 0.2s ease; }
+        .zoom-tick.active span { color: #facc15; font-weight: 700; transform: scale(1.1); }
+        .zoom-tick .dot { width: 3px; height: 3px; background: rgba(255, 255, 255, 0.4); border-radius: 50%; margin-top: 3px; }
+        .zoom-tick.active .dot { background: #facc15; width: 5px; height: 5px; }
     </style>
 </head>
 <body class="flex flex-col justify-between">
@@ -130,28 +107,36 @@
         </button>
     </div>
 
-    <!-- 中下區域：Siri 膠囊 (支援往上滑動展開) + iOS 相機變焦轉盤 -->
-    <div class="relative z-30 flex flex-col items-center pb-3 px-4 mt-auto">
+    <!-- 中下區域：可展開的 Siri 膠囊 + 變焦轉盤 -->
+    <div class="relative z-30 flex flex-col items-center pb-2 px-4 mt-auto">
         
-        <!-- Siri 視覺智慧膠囊 (點擊或往上滑動可展開) -->
-        <div id="aiStatusPill" onclick="toggleExpandPill()" class="siri-pill-border apple-pill-card px-6 py-3 rounded-full text-white text-sm font-medium flex items-center space-x-2.5 shadow-2xl cursor-pointer mb-3">
-            <span id="pillIcon" class="text-cyan-300 shrink-0"><i class="fa-solid fa-sparkles"></i></span>
-            <div id="pillTextContainer" class="truncate max-w-[75vw]">
-                <span id="pillText" class="tracking-wide">可能是：合掌芋</span>
+        <!-- 帶有向上指示與展開動畫的膠囊 -->
+        <div id="aiStatusPill" class="siri-pill-border apple-pill-card px-5 py-3 text-white text-sm shadow-2xl mb-2 flex flex-col">
+            <div class="flex items-center justify-between cursor-pointer select-none" onclick="toggleExpandPill()">
+                <div class="flex items-center space-x-2.5 truncate pr-2">
+                    <span id="pillIcon" class="text-cyan-300 shrink-0"><i class="fa-solid fa-sparkles"></i></span>
+                    <span id="pillTitle" class="font-medium tracking-wide truncate">點擊快門開始辨識</span>
+                </div>
+                <!-- 向上/向下指示箭頭 -->
+                <div id="expandArrow" class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-xs text-white/80 shrink-0 transition-transform duration-300">
+                    <i id="arrowIcon" class="fa-solid fa-chevron-up"></i>
+                </div>
+            </div>
+
+            <!-- 展開後的完整詳細內容容器 -->
+            <div id="expandedContent" class="mt-3 pt-3 border-t border-white/15 text-white/90 text-xs leading-relaxed overflow-y-auto max-h-[35vh] opacity-0 transition-opacity duration-300">
+                <p id="pillFullText">詳細內容將顯示於此...</p>
             </div>
         </div>
 
-        <!-- 影片中的 iOS 黃色專業相機變焦轉盤 (.5x 到 120x) -->
+        <!-- 變焦轉盤 -->
         <div class="zoom-dial-container" id="zoomDial">
-            <div class="zoom-dial-track flex space-x-8" id="zoomTrack">
-                <!-- 動態生成變焦刻度 -->
-            </div>
+            <div class="zoom-dial-track flex space-x-4" id="zoomTrack"></div>
         </div>
     </div>
 
-    <!-- 底部控制列 (詢問 / 快門 / 搜尋) -->
+    <!-- 底部控制列 -->
     <div class="relative z-30 pb-10 px-10 flex items-center justify-between max-w-sm mx-auto w-full">
-        <!-- 左側：詢問 -->
         <button onclick="openAskDrawer()" class="flex flex-col items-center space-y-1.5">
             <div class="w-14 h-14 rounded-full glass-btn-apple flex items-center justify-center text-white text-xl shadow-lg">
                 <i class="fa-regular fa-comment-dots"></i>
@@ -159,12 +144,10 @@
             <span class="text-[12px] text-white/90 font-medium tracking-wide">詢問</span>
         </button>
 
-        <!-- 中央：快門按鈕 -->
         <button onclick="captureAndAnalyze()" class="shutter-outer">
             <div class="shutter-inner"></div>
         </button>
 
-        <!-- 右側：搜尋 -->
         <button onclick="document.getElementById('fileInput').click()" class="flex flex-col items-center space-y-1.5">
             <div class="w-14 h-14 rounded-full glass-btn-apple flex items-center justify-center text-white text-xl shadow-lg">
                 <i class="fa-solid fa-magnifying-glass"></i>
@@ -175,7 +158,7 @@
 
     <!-- iOS 提問 Drawer -->
     <div id="askDrawer" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-end justify-center">
-        <div class="apple-pill-card bg-gray-900/95 w-full max-w-lg rounded-t-3xl p-6 border-t border-white/20 space-y-4">
+        <div class="apple-pill-card expanded bg-gray-900/95 w-full max-w-lg rounded-t-3xl p-6 border-t border-white/20 space-y-4">
             <div class="w-12 h-1.5 bg-white/30 rounded-full mx-auto mb-2"></div>
             <div class="flex items-center justify-between">
                 <h3 class="text-base font-bold text-white flex items-center space-x-2">
@@ -195,7 +178,7 @@
 
     <!-- API 設定 Modal -->
     <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-2xl flex items-center justify-center p-6">
-        <div class="apple-pill-card bg-gray-900/90 w-full max-w-md rounded-3xl p-6 border border-white/20 space-y-4">
+        <div class="apple-pill-card expanded bg-gray-900/90 w-full max-w-md rounded-3xl p-6 border border-white/20 space-y-4">
             <div class="flex items-center justify-between pb-2 border-b border-white/10">
                 <h2 class="text-base font-bold text-white">設定 API Key</h2>
                 <button onclick="closeSettings()" class="text-white/60 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -209,7 +192,7 @@
     </div>
 
     <script>
-        const DEFAULT_KEY = "";
+        const DEFAULT_KEY = "請輸入密鑰";
         if (!localStorage.getItem('gemini_api_key')) {
             localStorage.setItem('gemini_api_key', DEFAULT_KEY);
         }
@@ -217,9 +200,10 @@
         let currentStream = null;
         let currentFacingMode = "environment";
         let currentZoom = 1.0;
+        let isExpanded = false;
         let fullResponseText = "點擊快門開始辨識";
 
-        // 初始化變焦轉盤刻度 (.5x 到 120x)
+        // 初始化變焦轉盤 (.5x 到 120x)
         const zoomSteps = [0.5, 1.0, 2.0, 5.0, 10.0, 30.0, 120.0];
         const zoomTrack = document.getElementById('zoomTrack');
         zoomSteps.forEach(val => {
@@ -262,16 +246,21 @@
             videoEl.style.transform = `scale(${zoomVal})`;
         }
 
-        // 展開 / 收合 Siri 膠囊
+        // 點擊指示與膠囊進行 60Hz 絲滑展開與收合
         function toggleExpandPill() {
-            const pill = document.getElementById('aiStatusPill');
-            pill.classList.toggle('expanded');
-            if (pill.classList.contains('expanded')) {
-                document.getElementById('pillText').innerText = fullResponseText;
-                document.getElementById('pillText').style.whiteSpace = "pre-wrap";
+            isExpanded = !isExpanded;
+            const pillCard = document.getElementById('aiStatusPill');
+            const arrowIcon = document.getElementById('arrowIcon');
+            const expandedContent = document.getElementById('expandedContent');
+
+            if (isExpanded) {
+                pillCard.classList.add('expanded');
+                arrowIcon.className = "fa-solid fa-chevron-down";
+                expandedContent.style.opacity = "1";
             } else {
-                document.getElementById('pillText').innerText = fullResponseText.substring(0, 20) + (fullResponseText.length > 20 ? '...' : '');
-                document.getElementById('pillText').style.whiteSpace = "nowrap";
+                pillCard.classList.remove('expanded');
+                arrowIcon.className = "fa-solid fa-chevron-up";
+                expandedContent.style.opacity = "0";
             }
         }
 
@@ -294,9 +283,10 @@
             let apiKey = localStorage.getItem('gemini_api_key') || DEFAULT_KEY;
 
             fullResponseText = "分析中...";
-            document.getElementById('pillText').innerText = fullResponseText;
+            document.getElementById('pillTitle').innerText = fullResponseText;
+            document.getElementById('pillFullText').innerText = fullResponseText;
             document.getElementById('pillIcon').innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i>`;
-            document.getElementById('aiStatusPill').classList.remove('expanded');
+            if (isExpanded) toggleExpandPill();
 
             const video = document.getElementById('cameraStream');
             const canvas = document.createElement('canvas');
@@ -323,7 +313,7 @@
             if (!file) return;
 
             fullResponseText = "讀取照片中...";
-            document.getElementById('pillText').innerText = fullResponseText;
+            document.getElementById('pillTitle').innerText = fullResponseText;
             const reader = new FileReader();
             reader.onload = function(e) {
                 sendToGemini(e.target.result.split(',')[1], apiKey, null);
@@ -349,8 +339,9 @@
 
                     const data = await response.json();
                     if (data.candidates && data.candidates[0].content) {
-                        fullResponseText = data.candidates[0].content.parts[0].text.replace(/\*/g, '').trim();
-                        document.getElementById('pillText').innerText = fullResponseText.substring(0, 20) + '... (點擊展開)';
+                        fullResponseText = data.candidates[0].content.parts[0].text;
+                        document.getElementById('pillTitle').innerText = fullResponseText.substring(0, 18) + '... (點擊展開)';
+                        document.getElementById('pillFullText').innerText = fullResponseText;
                         document.getElementById('pillIcon').innerHTML = `<i class="fa-solid fa-sparkles"></i>`;
                         success = true;
                         break;
@@ -360,7 +351,8 @@
 
             if (!success) {
                 fullResponseText = "無法辨識，請檢查 API Key";
-                document.getElementById('pillText').innerText = fullResponseText;
+                document.getElementById('pillTitle').innerText = fullResponseText;
+                document.getElementById('pillFullText').innerText = fullResponseText;
             }
         }
     </script>
