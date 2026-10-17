@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="h-full bg-black select-none">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Visual Intelligence</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Marked.js for Markdown Rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        iosDark: '#000000',
+                        glassBg: 'rgba(255, 255, 255, 0.15)',
+                        glassBorder: 'rgba(255, 255, 255, 0.25)',
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Hide scrollbars */
+        ::-webkit-scrollbar { display: none; }
+        * { -webkit-tap-highlight-color: transparent; }
+
+        /* Apple Spatial Glassmorphism */
+        .apple-glass {
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .apple-glass-button {
+            background: rgba(200, 200, 210, 0.22);
+            backdrop-filter: blur(25px) saturate(190%);
+            -webkit-backdrop-filter: blur(25px) saturate(190%);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 10px 25px rgba(0,0,0,0.3);
+            transition: transform 0.15s cubic-bezier(0.2, 0, 0.1, 1), background 0.2s;
+        }
+
+        .apple-glass-button:active {
+            transform: scale(0.92);
+            background: rgba(255, 255, 255, 0.35);
+        }
+
+        /* Siri Holographic Halo Border for Result Pill */
+        .siri-halo-border {
+            position: relative;
+            background: rgba(18, 18, 28, 0.65);
+            backdrop-filter: blur(35px) saturate(200%);
+            -webkit-backdrop-filter: blur(35px) saturate(200%);
+            border-radius: 9999px;
+            padding: 1px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .siri-halo-border::before {
+            content: '';
+            position: absolute;
+            inset: -1.5px;
+            border-radius: 9999px;
+            background: linear-gradient(90deg, #00f2fe, #4facfe, #00f2fe, #ff007f, #8a2be2, #00f2fe);
+            background-size: 300% 300%;
+            animation: siriGlow 4s linear infinite;
+            z-index: -1;
+            opacity: 0.85;
+        }
+
+        @keyframes siriGlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Large Shutter Inner Glow */
+        .shutter-glow {
+            box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.6), 0 0 25px rgba(255, 255, 255, 0.25);
+        }
+
+        /* Laser Scan Bar */
+        .scan-laser-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00f2fe, #ff007f, #00f2fe, transparent);
+            box-shadow: 0 0 15px #00f2fe, 0 0 30px #ff007f;
+            z-index: 20;
+            animation: laserSweep 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes laserSweep {
+            0% { top: 10%; }
+            100% { top: 90%; }
+        }
+    </style>
+</head>
+<body class="h-full w-full bg-black text-white font-sans overflow-hidden flex flex-col justify-between relative">
+
+    <!-- Fullscreen Camera Viewport / Photo Background -->
+    <div id="viewportContainer" class="absolute inset-0 z-0 bg-black flex items-center justify-center">
+        <!-- Live Video Stream -->
+        <video id="webcam" autoplay playsinline class="w-full h-full object-cover hidden"></video>
+
+        <!-- Static Image Preview -->
+        <img id="imagePreview" class="w-full h-full object-cover hidden" alt="拍攝照片">
+
+        <!-- Initial Placeholder Screen (In case camera is off) -->
+        <div id="cameraPlaceholder" class="flex flex-col items-center justify-center text-center p-6 space-y-4">
+            <div class="w-20 h-20 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white text-3xl shadow-2xl backdrop-blur-xl">
+                <i class="fa-solid fa-camera"></i>
+            </div>
+            <p class="text-sm text-gray-300 font-light max-w-xs">點擊允許存取相機，或點擊下方「搜尋」選擇相簿照片以進行視覺辨識。</p>
+            <button onclick="startCamera()" class="px-6 py-2.5 rounded-full bg-white text-black font-medium text-xs shadow-xl active:scale-95 transition">
+                開啟相機
+            </button>
+        </div>
+
+        <!-- Scanning Laser Line Overlay -->
+        <div id="scanLaser" class="scan-laser-line hidden"></div>
+    </div>
+
+    <!-- Top Floating Auto-fading Controls (Settings & Camera Flip) -->
+    <header class="relative z-20 w-full p-4 flex items-center justify-between pointer-events-none">
+        <button onclick="toggleCameraFacing()" class="pointer-events-auto apple-glass-button w-10 h-10 rounded-full flex items-center justify-center text-white text-sm">
+            <i class="fa-solid fa-camera-rotate"></i>
+        </button>
+        <button onclick="openSettingsModal()" class="pointer-events-auto apple-glass-button w-10 h-10 rounded-full flex items-center justify-center text-white text-sm">
+            <i class="fa-solid fa-gear"></i>
+        </button>
+    </header>
+
+    <!-- Bottom Interface Overlay (Matching Apple Visual Intelligence Screenshot) -->
+    <div class="relative z-20 w-full pb-8 pt-20 px-6 bg-gradient-to-t from-black/85 via-black/40 to-transparent flex flex-col items-center space-y-6 pointer-events-auto">
+        
+        <!-- Floating Result Pill (Middle Tag) -->
+        <div id="resultPill" onclick="openResponseDrawer()" class="siri-halo-border cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 hidden">
+            <div class="px-5 py-2.5 rounded-full bg-black/60 backdrop-blur-2xl flex items-center space-x-2 text-sm font-medium text-white shadow-2xl">
+                <span id="pillText">🍃 可能是：合掌芋</span>
+                <i class="fa-solid fa-chevron-right text-xs text-gray-400 ml-1"></i>
+            </div>
+        </div>
+
+        <!-- Main Controller Row (Ask / Shutter / Search) -->
+        <div class="w-full max-w-xs flex items-center justify-between px-2">
+            
+            <!-- Left Button: Ask (詢問) -->
+            <div class="flex flex-col items-center space-y-1.5">
+                <button onclick="openAskModal()" class="apple-glass-button w-14 h-14 rounded-full flex items-center justify-center text-white text-xl">
+                    <i class="fa-regular fa-comment-dots"></i>
+                </button>
+                <span class="text-[11px] font-medium text-gray-200 tracking-wider">詢問</span>
+            </div>
+
+            <!-- Center Shutter Button -->
+            <div class="flex flex-col items-center">
+                <button id="shutterBtn" onclick="triggerVisualScan()" class="apple-glass-button w-20 h-20 rounded-full flex items-center justify-center p-1.5 shutter-glow">
+                    <div class="w-full h-full rounded-full bg-white/30 border border-white/80 transition-all duration-200 active:bg-white/60"></div>
+                </button>
+            </div>
+
+            <!-- Right Button: Search (搜尋 / 相簿) -->
+            <div class="flex flex-col items-center space-y-1.5">
+                <label class="apple-glass-button w-14 h-14 rounded-full flex items-center justify-center text-white text-xl cursor-pointer">
+                    <i class="fa-regular fa-image"></i>
+                    <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleFileUpload(event)">
+                </label>
+                <span class="text-[11px] font-medium text-gray-200 tracking-wider">搜尋</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Siri Detailed Response Card Drawer (Slide Up) -->
+    <div id="responseDrawer" class="fixed inset-x-0 bottom-0 z-40 apple-glass rounded-t-[32px] p-6 text-white transition-all duration-500 transform translate-y-full max-h-[75vh] flex flex-col border-t border-white/30 shadow-2xl">
+        <div class="w-12 h-1 bg-white/40 rounded-full mx-auto mb-4 flex-shrink-0"></div>
+        <div class="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-sparkles text-cyan-400"></i>
+                <span id="drawerTitle" class="font-semibold text-sm">Visual Intelligence 辨識結果</span>
+            </div>
+            <button onclick="closeResponseDrawer()" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-300 hover:text-white">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+        <div id="drawerBody" class="overflow-y-auto flex-1 text-xs sm:text-sm text-gray-200 leading-relaxed space-y-3 pr-1">
+            <!-- AI Response Markdown Content -->
+        </div>
+        <div class="pt-4 border-t border-white/10 flex items-center justify-between mt-2">
+            <button onclick="speakResponse()" class="text-xs text-cyan-400 font-medium flex items-center space-x-1.5">
+                <i class="fa-solid fa-volume-high"></i>
+                <span>語音朗讀</span>
+            </button>
+            <button onclick="copyResponse()" class="text-xs text-gray-400 hover:text-white flex items-center space-x-1.5">
+                <i class="fa-regular fa-copy"></i>
+                <span>複製內容</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Ask Siri Modal Dialog -->
+    <div id="askModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300">
+        <div class="apple-glass w-full max-w-lg rounded-3xl p-5 border border-white/20 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-gray-300 flex items-center gap-1.5">
+                    <i class="fa-solid fa-microphone text-cyan-400"></i> 詢問關於畫面中的物品
+                </span>
+                <button onclick="closeAskModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="flex items-center space-x-2 bg-black/40 rounded-full px-4 py-2 border border-white/15">
+                <input id="askInput" type="text" placeholder="例如：這植物需要多少陽光？" class="w-full bg-transparent text-sm text-white focus:outline-none placeholder-gray-500" onkeydown="if(event.key==='Enter') submitAskQuery()">
+                <button onclick="toggleVoiceInput()" id="voiceBtn" class="text-cyan-400 p-1.5"><i class="fa-solid fa-microphone"></i></button>
+                <button onclick="submitAskQuery()" class="w-8 h-8 rounded-full bg-cyan-500 text-black flex items-center justify-center font-bold"><i class="fa-solid fa-arrow-up text-xs"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300">
+        <div class="apple-glass w-full max-w-sm rounded-3xl p-6 border border-white/20 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                <h3 class="font-semibold text-sm text-white">Visual Intelligence 設定</h3>
+                <button onclick="closeSettingsModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-gray-300 mb-1">Google Gemini API Key</label>
+                    <input id="apiKeyInput" type="password" placeholder="AIzaSy..." class="w-full px-3 py-2 rounded-xl bg-black/50 border border-white/15 text-white focus:outline-none font-mono">
+                </div>
+                <div>
+                    <label class="block text-gray-300 mb-1">模型選擇</label>
+                    <select id="modelSelect" class="w-full px-3 py-2 rounded-xl bg-black/70 border border-white/15 text-white focus:outline-none">
+                        <option value="gemini-2.5-flash">gemini-2.5-flash (推薦快速辨識)</option>
+                        <option value="gemini-1.5-flash">gemini-1.5-flash (標準)</option>
+                        <option value="gemini-1.5-pro">gemini-1.5-pro (高階分析)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2 border-t border-white/10">
+                <button onclick="saveSettings()" class="px-5 py-2 rounded-xl bg-white text-black font-medium text-xs">儲存設定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 z-50 apple-glass px-4 py-2 rounded-full text-xs text-white opacity-0 pointer-events-none transition-all duration-300 shadow-xl flex items-center space-x-2">
+        <i id="toastIcon" class="fa-solid fa-circle-info text-cyan-400"></i>
+        <span id="toastText">訊息提示</span>
+    </div>
+
+    <!-- Application JavaScript Logic -->
+    <script>
+        const DEFAULT_API_KEY = "AIzaSyCllR8lawGzKygvrrZj8IbfszV0Mi9vjyo";
+        
+        let apiKey = localStorage.getItem('vi_gemini_key') || DEFAULT_API_KEY;
+        let selectedModel = localStorage.getItem('vi_gemini_model') || 'gemini-2.5-flash';
+        let facingMode = 'environment';
+        let currentBase64Image = null;
+        let lastFullResponse = "";
+        let audioCtx = null;
+        let recognition = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('apiKeyInput').value = apiKey;
+            document.getElementById('modelSelect').value = selectedModel;
+            startCamera();
+            initSpeech();
+        });
+
+        // Web Audio API Sound Effects
+        function playChime(type) {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                const now = audioCtx.currentTime;
+
+                if (type === 'shutter') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, now);
+                    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                    osc.start(now); osc.stop(now + 0.15);
+                } else if (type === 'success') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.08);
+                    osc.frequency.setValueAtTime(783.99, now + 0.16);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now); osc.stop(now + 0.35);
+                }
+            } catch(e) {}
+        }
+
+        // Camera Engine
+        async function startCamera() {
+            const video = document.getElementById('webcam');
+            const placeholder = document.getElementById('cameraPlaceholder');
+            const preview = document.getElementById('imagePreview');
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: facingMode }
+                });
+                video.srcObject = stream;
+                video.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                preview.classList.add('hidden');
+            } catch (err) {
+                showToast("無法存取相機，請允許相機權限或上傳照片");
+            }
+        }
+
+        function toggleCameraFacing() {
+            facingMode = facingMode === 'environment' ? 'user' : 'environment';
+            startCamera();
+        }
+
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                const video = document.getElementById('webcam');
+                const placeholder = document.getElementById('cameraPlaceholder');
+                const preview = document.getElementById('imagePreview');
+
+                if (video.srcObject) {
+                    video.srcObject.getTracks().forEach(t => t.stop());
+                }
+
+                video.classList.add('hidden');
+                placeholder.classList.add('hidden');
+                preview.src = evt.target.result;
+                preview.classList.remove('hidden');
+
+                currentBase64Image = evt.target.result.split(',')[1];
+                showToast("照片已加載，準備辨識");
+                triggerVisualScan();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function captureCameraFrame() {
+            const video = document.getElementById('webcam');
+            if (video.classList.contains('hidden') || !video.srcObject) return null;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth || 1280;
+            canvas.height = video.videoHeight || 720;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            return canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+        }
+
+        // Core Visual Scan Execution
+        async function triggerVisualScan(customPrompt = null) {
+            playChime('shutter');
+
+            let base64Img = currentBase64Image;
+            if (!document.getElementById('webcam').classList.contains('hidden')) {
+                base64Img = captureCameraFrame();
+            }
+
+            if (!base64Img) {
+                showToast("請開啟相機或選擇照片");
+                return;
+            }
+
+            // UI Scanning State
+            document.getElementById('scanLaser').classList.remove('hidden');
+            const pill = document.getElementById('resultPill');
+            pill.classList.remove('hidden');
+            document.getElementById('pillText').innerText = "✨ 正在辨識中...";
+
+            const defaultPrompt = customPrompt || "請辨識這張圖片中的主要物品、植物、動物或文字。第一行請務必給出簡短名稱（例如：「🍃 可能是：合掌芋」），隨後請給出詳細說明、特徵與照顧或使用建議。";
+
+            try {
+                const result = await callGeminiVision(defaultPrompt, base64Img);
+                
+                // Parse First Line for Pill Label
+                const lines = result.trim().split('\n');
+                let shortTitle = lines[0].replace(/[*#]/g, '').trim();
+                if (shortTitle.length > 25) shortTitle = shortTitle.substring(0, 25) + "...";
+
+                document.getElementById('pillText').innerText = shortTitle;
+                lastFullResponse = result;
+                document.getElementById('drawerBody').innerHTML = marked.parse(result);
+
+                playChime('success');
+            } catch (err) {
+                showToast("辨識失敗: " + err.message);
+                document.getElementById('pillText').innerText = "⚠️ 辨識失敗，點擊重新嘗試";
+            } finally {
+                document.getElementById('scanLaser').classList.add('hidden');
+            }
+        }
+
+        // Call Gemini API with Fallback
+        async function callGeminiVision(promptText, base64Data) {
+            const models = [selectedModel, 'gemini-1.5-flash', 'gemini-2.5-flash'];
+            let lastErr = null;
+
+            for (const model of models) {
+                try {
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+                    const payload = {
+                        contents: [{
+                            parts: [
+                                { text: promptText },
+                                { inlineData: { mimeType: 'image/jpeg', data: base64Data } }
+                            ]
+                        }]
+                    };
+
+                    const res = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.error?.message || 'API 請求失敗');
+
+                    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (text) return text;
+                } catch (e) {
+                    lastErr = e;
+                }
+            }
+            throw lastErr || new Error("無法連接 Gemini API");
+        }
+
+        // Drawer & Modal Controllers
+        function openResponseDrawer() {
+            if (!lastFullResponse) return;
+            document.getElementById('responseDrawer').classList.remove('translate-y-full');
+        }
+
+        function closeResponseDrawer() {
+            document.getElementById('responseDrawer').classList.add('translate-y-full');
+        }
+
+        function openAskModal() {
+            document.getElementById('askModal').classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        function closeAskModal() {
+            document.getElementById('askModal').classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        function submitAskQuery() {
+            const query = document.getElementById('askInput').value.trim();
+            if (!query) return;
+            closeAskModal();
+            document.getElementById('askInput').value = '';
+            triggerVisualScan(`關於圖中物品問題：${query}`);
+        }
+
+        function initSpeech() {
+            const SpeechReg = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechReg) {
+                recognition = new SpeechReg();
+                recognition.lang = 'zh-TW';
+                recognition.onresult = (e) => {
+                    document.getElementById('askInput').value = e.results[0][0].transcript;
+                };
+            }
+        }
+
+        function toggleVoiceInput() {
+            if (recognition) recognition.start();
+        }
+
+        function speakResponse() {
+            if (!lastFullResponse) return;
+            window.speechSynthesis.cancel();
+            const cleanText = lastFullResponse.replace(/[*#_~]/g, '');
+            const u = new SpeechSynthesisUtterance(cleanText);
+            u.lang = 'zh-TW';
+            window.speechSynthesis.speak(u);
+        }
+
+        function copyResponse() {
+            if (!lastFullResponse) return;
+            navigator.clipboard.writeText(lastFullResponse);
+            showToast("已複製回應內容");
+        }
+
+        function openSettingsModal() {
+            document.getElementById('settingsModal').classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        function saveSettings() {
+            apiKey = document.getElementById('apiKeyInput').value.trim() || DEFAULT_API_KEY;
+            selectedModel = document.getElementById('modelSelect').value;
+            localStorage.setItem('vi_gemini_key', apiKey);
+            localStorage.setItem('vi_gemini_model', selectedModel);
+            closeSettingsModal();
+            showToast("設定已儲存");
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastText').innerText = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => toast.classList.add('opacity-0', 'pointer-events-none'), 2500);
+        }
+    </script>
+</body>
+</html>
