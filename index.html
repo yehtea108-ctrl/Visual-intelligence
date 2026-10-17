@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>視覺智慧</title>
-    <!-- iOS 縮圖與標題 -->
     <link rel="apple-touch-icon" href="https://i.imgur.com/your_icon_placeholder.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -16,49 +15,33 @@
         * { user-select: none; -webkit-user-select: none; box-sizing: border-box; margin: 0; padding: 0; }
         body { background-color: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", sans-serif; overflow: hidden; height: 100vh; width: 100vw; position: relative; }
 
-        /* Apple Intelligence 螢幕外圍彩光 */
-        .apple-edge-glow {
-            position: fixed; inset: 0; pointer-events: none; z-index: 40; opacity: 0; transition: opacity 0.4s ease;
-            box-shadow: inset 0 0 35px 8px rgba(56, 189, 248, 0.6), inset 0 0 60px 20px rgba(168, 85, 247, 0.5), inset 0 0 90px 35px rgba(236, 72, 153, 0.4);
-            animation: auraPulse 2s infinite alternate ease-in-out;
-        }
-        .apple-edge-glow.active { opacity: 1; }
-        @keyframes auraPulse {
-            0% { box-shadow: inset 0 0 30px 6px rgba(56, 189, 248, 0.7), inset 0 0 50px 15px rgba(168, 85, 247, 0.5); }
-            100% { box-shadow: inset 0 0 50px 14px rgba(56, 189, 248, 0.9), inset 0 0 85px 30px rgba(168, 85, 247, 0.7); }
-        }
-
-        /* iOS 原生風格通知卡片 */
-        .ios-notification-banner {
+        /* 蘋果 Visual Intelligence 經典 Siri 炫彩流光膠囊 */
+        .apple-pill-card {
             background: rgba(35, 35, 40, 0.75);
-            backdrop-filter: blur(30px) saturate(190%);
-            -webkit-backdrop-filter: blur(30px) saturate(190%);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 9999px;
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(35px) saturate(200%);
+            -webkit-backdrop-filter: blur(35px) saturate(200%);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            position: relative;
+            max-width: 90vw;
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .siri-pill-border::before {
+            content: ''; position: absolute; inset: -1.5px; border-radius: 9999px;
+            background: linear-gradient(90deg, #38bdf8, #a855f7, #ec4899, #38bdf8);
+            background-size: 300% 300%; z-index: -1; animation: siriBorderFlow 4s linear infinite; opacity: 0.85; filter: blur(3px);
+        }
+        @keyframes siriBorderFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        /* 展開抽屜效果 (往上滑動展開) */
+        .apple-pill-card.expanded {
+            border-radius: 28px !important;
+            padding: 20px !important;
+            max-height: 50vh;
+            overflow-y: auto;
         }
 
-        /* 完全還原模擬圖：中央雙層灰白玻璃快門按鈕 */
-        .shutter-mock-outer {
-            width: 82px; height: 82px;
-            border-radius: 9999px;
-            background: rgba(255, 255, 255, 0.18);
-            border: 2px solid rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
-            display: flex; items-center; justify-center;
-            transition: transform 0.15s ease;
-        }
-        .shutter-mock-outer:active { transform: scale(0.9); }
-        .shutter-mock-inner {
-            width: 62px; height: 62px;
-            border-radius: 9999px;
-            background: radial-gradient(circle, #e5e7eb 0%, #9ca3af 100%);
-            box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.8), 0 4px 10px rgba(0, 0, 0, 0.3);
-        }
-
-        /* 蘋果原版毛玻璃圖示按鈕 */
+        /* 蘋果毛玻璃圓形按鈕 */
         .glass-btn-apple {
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(25px) saturate(180%);
@@ -69,36 +52,67 @@
         }
         .glass-btn-apple:active { transform: scale(0.92); }
 
-        /* iOS 經典變焦切換膠囊按鈕 */
-        .zoom-toggle-container {
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 9999px;
-            padding: 3px 8px;
+        /* 中央快門按鈕 */
+        .shutter-outer {
+            width: 82px; height: 82px; border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.35);
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.15s ease;
         }
-        .zoom-btn {
-            padding: 4px 8px;
-            border-radius: 9999px;
-            font-size: 11px;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.7);
-            transition: all 0.2s ease;
+        .shutter-outer:active { transform: scale(0.9); }
+        .shutter-inner {
+            width: 64px; height: 64px; border-radius: 9999px;
+            background: radial-gradient(circle, #f3f4f6 0%, #9ca3af 100%);
+            box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.8), 0 3px 8px rgba(0, 0, 0, 0.3);
         }
-        .zoom-btn.active {
-            background: rgba(255, 255, 255, 0.25);
-            color: #facc15;
+
+        /* 影片中的 iOS 黃色專業相機變焦轉盤風格 */
+        .zoom-dial-container {
+            position: relative;
+            width: 100%;
+            overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: none;
+            padding: 8px 0;
+        }
+        .zoom-dial-container::-webkit-scrollbar { display: none; }
+        .zoom-dial-track {
+            display: inline-flex;
+            align-items: center;
+            space-x: 16px;
+            padding: 0 50vw;
+        }
+        .zoom-tick {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 0 12px;
+            transition: transform 0.2s ease;
+        }
+        .zoom-tick span {
+            font-size: 13px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.5);
+            transition: color 0.2s ease, font-weight 0.2s ease;
+        }
+        .zoom-tick.active span {
+            color: #facc15; /* iOS 黃色 */
             font-weight: 700;
+            transform: scale(1.15);
         }
+        .zoom-tick .dot {
+            width: 4px; height: 4px; background: rgba(255, 255, 255, 0.4); border-radius: 50%; margin-top: 4px;
+        }
+        .zoom-tick.active .dot { background: #facc15; width: 6px; height: 6px; }
     </style>
 </head>
 <body class="flex flex-col justify-between">
 
-    <!-- 外圍彩光環 -->
-    <div id="appleEdgeGlow" class="apple-edge-glow"></div>
-
-    <!-- 相機畫面 -->
+    <!-- 全螢幕相機背景 -->
     <div class="absolute inset-0 z-0 overflow-hidden">
         <video id="cameraStream" autoplay playsinline class="w-full h-full object-cover transition-transform duration-100"></video>
         <div class="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/80 pointer-events-none"></div>
@@ -106,7 +120,7 @@
 
     <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
 
-    <!-- 頂部列 (切換鏡頭 / 設定) -->
+    <!-- 頂部控制列 -->
     <div class="relative z-30 pt-12 px-6 flex justify-between items-center">
         <button onclick="toggleCameraFacing()" class="w-9 h-9 rounded-full glass-btn-apple flex items-center justify-center text-white/80">
             <i class="fa-solid fa-camera-rotate text-sm"></i>
@@ -116,26 +130,26 @@
         </button>
     </div>
 
-    <!-- iOS 訊息通知膠囊 (顯示 AI 回應或錯誤提示) -->
-    <div class="relative z-30 flex flex-col items-center pb-4 px-6 mt-auto">
-        <div id="aiStatusPill" onclick="captureAndAnalyze()" class="ios-notification-banner px-6 py-3 text-white text-sm font-medium flex items-center space-x-2.5 shadow-2xl cursor-pointer active:scale-95 transition-all mb-3">
-            <span id="pillIcon" class="text-cyan-300"><i class="fa-solid fa-sparkles"></i></span>
-            <span id="pillText" class="tracking-wide">點擊快門開始辨識</span>
+    <!-- 中下區域：Siri 膠囊 (支援往上滑動展開) + iOS 相機變焦轉盤 -->
+    <div class="relative z-30 flex flex-col items-center pb-3 px-4 mt-auto">
+        
+        <!-- Siri 視覺智慧膠囊 (點擊或往上滑動可展開) -->
+        <div id="aiStatusPill" onclick="toggleExpandPill()" class="siri-pill-border apple-pill-card px-6 py-3 rounded-full text-white text-sm font-medium flex items-center space-x-2.5 shadow-2xl cursor-pointer mb-3">
+            <span id="pillIcon" class="text-cyan-300 shrink-0"><i class="fa-solid fa-sparkles"></i></span>
+            <div id="pillTextContainer" class="truncate max-w-[75vw]">
+                <span id="pillText" class="tracking-wide">可能是：合掌芋</span>
+            </div>
         </div>
 
-        <!-- 最高支援 120x 數位裁切變焦按鈕列 -->
-        <div class="zoom-toggle-container flex items-center space-x-1 shadow-lg overflow-x-auto max-w-full">
-            <button onclick="setZoom(0.5)" id="zoomBtn05" class="zoom-btn">.5x</button>
-            <button onclick="setZoom(1.0)" id="zoomBtn10" class="zoom-btn active">1x</button>
-            <button onclick="setZoom(2.0)" id="zoomBtn20" class="zoom-btn">2x</button>
-            <button onclick="setZoom(5.0)" id="zoomBtn50" class="zoom-btn">5x</button>
-            <button onclick="setZoom(10.0)" id="zoomBtn100" class="zoom-btn">10x</button>
-            <button onclick="setZoom(30.0)" id="zoomBtn300" class="zoom-btn">30x</button>
-            <button onclick="setZoom(120.0)" id="zoomBtn1200" class="zoom-btn">120x</button>
+        <!-- 影片中的 iOS 黃色專業相機變焦轉盤 (.5x 到 120x) -->
+        <div class="zoom-dial-container" id="zoomDial">
+            <div class="zoom-dial-track flex space-x-8" id="zoomTrack">
+                <!-- 動態生成變焦刻度 -->
+            </div>
         </div>
     </div>
 
-    <!-- 底部控制列 (完全比對模擬圖) -->
+    <!-- 底部控制列 (詢問 / 快門 / 搜尋) -->
     <div class="relative z-30 pb-10 px-10 flex items-center justify-between max-w-sm mx-auto w-full">
         <!-- 左側：詢問 -->
         <button onclick="openAskDrawer()" class="flex flex-col items-center space-y-1.5">
@@ -145,9 +159,9 @@
             <span class="text-[12px] text-white/90 font-medium tracking-wide">詢問</span>
         </button>
 
-        <!-- 中央：模擬圖原版灰色灰白玻璃雙環快門 -->
-        <button onclick="captureAndAnalyze()" class="shutter-mock-outer">
-            <div class="shutter-mock-inner"></div>
+        <!-- 中央：快門按鈕 -->
+        <button onclick="captureAndAnalyze()" class="shutter-outer">
+            <div class="shutter-inner"></div>
         </button>
 
         <!-- 右側：搜尋 -->
@@ -159,9 +173,9 @@
         </button>
     </div>
 
-    <!-- iOS 風格提問 Drawer -->
+    <!-- iOS 提問 Drawer -->
     <div id="askDrawer" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-end justify-center">
-        <div class="ios-notification-banner bg-gray-900/95 w-full max-w-lg rounded-t-3xl p-6 border-t border-white/20 space-y-4">
+        <div class="apple-pill-card bg-gray-900/95 w-full max-w-lg rounded-t-3xl p-6 border-t border-white/20 space-y-4">
             <div class="w-12 h-1.5 bg-white/30 rounded-full mx-auto mb-2"></div>
             <div class="flex items-center justify-between">
                 <h3 class="text-base font-bold text-white flex items-center space-x-2">
@@ -171,7 +185,7 @@
                 <button onclick="closeAskDrawer()" class="text-white/60 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div>
-                <input type="text" id="customPromptInput" placeholder="例如：這是什麼植物？或翻譯這段文字..." class="w-full bg-black/50 border border-white/20 rounded-2xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-cyan-400">
+                <input type="text" id="customPromptInput" placeholder="例如：這是什麼？" class="w-full bg-black/50 border border-white/20 rounded-2xl px-4 py-3.5 text-white text-sm focus:outline-none focus:border-cyan-400">
             </div>
             <button onclick="submitCustomAsk()" class="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-2xl font-semibold text-white shadow-lg">
                 送出提問
@@ -179,25 +193,42 @@
         </div>
     </div>
 
-    <!-- API Key 設定 Modal (含替換洩漏金鑰提示) -->
+    <!-- API 設定 Modal -->
     <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-2xl flex items-center justify-center p-6">
-        <div class="ios-notification-banner bg-gray-900/90 w-full max-w-md rounded-3xl p-6 border border-white/20 space-y-4">
+        <div class="apple-pill-card bg-gray-900/90 w-full max-w-md rounded-3xl p-6 border border-white/20 space-y-4">
             <div class="flex items-center justify-between pb-2 border-b border-white/10">
                 <h2 class="text-base font-bold text-white">設定 API Key</h2>
                 <button onclick="closeSettings()" class="text-white/60 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <p class="text-xs text-amber-300">舊的公開金鑰已遭 Google 系統鎖定，請貼上您個人申請的最新 Gemini API Key：</p>
             <div>
-                <input type="password" id="apiKeyInput" placeholder="貼上 AIza... 金鑰" class="w-full bg-black/60 border border-white/20 rounded-2xl px-4 py-3 text-white text-sm focus:outline-none focus:border-cyan-400">
+                <label class="text-xs text-cyan-300 block mb-1">Gemini API Key</label>
+                <input type="password" id="apiKeyInput" placeholder="請貼上 API Key" class="w-full bg-black/60 border border-white/20 rounded-2xl px-4 py-3 text-white text-sm focus:outline-none focus:border-cyan-400">
             </div>
-            <button onclick="saveSettings()" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl font-semibold text-white shadow-lg">儲存並儲存</button>
+            <button onclick="saveSettings()" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl font-semibold text-white shadow-lg">儲存設定</button>
         </div>
     </div>
 
     <script>
+        const DEFAULT_KEY = "";
+        if (!localStorage.getItem('gemini_api_key')) {
+            localStorage.setItem('gemini_api_key', DEFAULT_KEY);
+        }
+
         let currentStream = null;
         let currentFacingMode = "environment";
         let currentZoom = 1.0;
+        let fullResponseText = "點擊快門開始辨識";
+
+        // 初始化變焦轉盤刻度 (.5x 到 120x)
+        const zoomSteps = [0.5, 1.0, 2.0, 5.0, 10.0, 30.0, 120.0];
+        const zoomTrack = document.getElementById('zoomTrack');
+        zoomSteps.forEach(val => {
+            const div = document.createElement('div');
+            div.className = `zoom-tick ${val === 1.0 ? 'active' : ''}`;
+            div.innerHTML = `<span>${val}x</span><div class="dot"></div>`;
+            div.onclick = () => setZoom(val);
+            zoomTrack.appendChild(div);
+        });
 
         async function initCamera() {
             if (currentStream) currentStream.getTracks().forEach(track => track.stop());
@@ -207,9 +238,7 @@
                 });
                 document.getElementById('cameraStream').srcObject = currentStream;
                 applyZoom(currentZoom);
-            } catch (err) {
-                console.log("相機啟動失敗:", err);
-            }
+            } catch (err) { console.log("相機啟動失敗"); }
         }
         initCamera();
 
@@ -218,16 +247,13 @@
             initCamera();
         }
 
-        // 數位裁切放大（支援最高 120x）
         function setZoom(zoomVal) {
             currentZoom = zoomVal;
-            const btnIds = { 0.5: 'zoomBtn05', 1: 'zoomBtn10', 2: 'zoomBtn20', 5: 'zoomBtn50', 10: 'zoomBtn100', 30: 'zoomBtn300', 120: 'zoomBtn1200' };
-            Object.values(btnIds).forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.classList.remove('active');
+            const ticks = zoomTrack.children;
+            zoomSteps.forEach((val, idx) => {
+                if (val === zoomVal) ticks[idx].classList.add('active');
+                else ticks[idx].classList.remove('active');
             });
-            if (btnIds[zoomVal]) document.getElementById(btnIds[zoomVal]).classList.add('active');
-
             applyZoom(zoomVal);
         }
 
@@ -236,20 +262,24 @@
             videoEl.style.transform = `scale(${zoomVal})`;
         }
 
-        function openSettings() {
-            document.getElementById('apiKeyInput').value = localStorage.getItem('gemini_api_key') || '';
-            document.getElementById('settingsModal').classList.remove('hidden');
+        // 展開 / 收合 Siri 膠囊
+        function toggleExpandPill() {
+            const pill = document.getElementById('aiStatusPill');
+            pill.classList.toggle('expanded');
+            if (pill.classList.contains('expanded')) {
+                document.getElementById('pillText').innerText = fullResponseText;
+                document.getElementById('pillText').style.whiteSpace = "pre-wrap";
+            } else {
+                document.getElementById('pillText').innerText = fullResponseText.substring(0, 20) + (fullResponseText.length > 20 ? '...' : '');
+                document.getElementById('pillText').style.whiteSpace = "nowrap";
+            }
         }
+
+        function openSettings() { document.getElementById('apiKeyInput').value = localStorage.getItem('gemini_api_key') || ''; document.getElementById('settingsModal').classList.remove('hidden'); }
         function closeSettings() { document.getElementById('settingsModal').classList.add('hidden'); }
         function saveSettings() {
             const val = document.getElementById('apiKeyInput').value.trim();
-            if (val) {
-                localStorage.setItem('gemini_api_key', val);
-                closeSettings();
-                alert('API Key 已更換並儲存！');
-            } else {
-                alert('請輸入有效的 Gemini API Key！');
-            }
+            if (val) { localStorage.setItem('gemini_api_key', val); closeSettings(); alert('已儲存！'); }
         }
 
         function openAskDrawer() { document.getElementById('askDrawer').classList.remove('hidden'); }
@@ -261,23 +291,18 @@
         }
 
         async function captureAndAnalyze(customPrompt = null) {
-            const apiKey = localStorage.getItem('gemini_api_key');
-            if (!apiKey) {
-                openSettings();
-                return;
-            }
+            let apiKey = localStorage.getItem('gemini_api_key') || DEFAULT_KEY;
 
-            document.getElementById('appleEdgeGlow').classList.add('active');
-            document.getElementById('pillText').innerText = '分析中...';
+            fullResponseText = "分析中...";
+            document.getElementById('pillText').innerText = fullResponseText;
             document.getElementById('pillIcon').innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i>`;
+            document.getElementById('aiStatusPill').classList.remove('expanded');
 
             const video = document.getElementById('cameraStream');
             const canvas = document.createElement('canvas');
-            canvas.width = 1280;
-            canvas.height = 720;
+            canvas.width = 1280; canvas.height = 720;
             const ctx = canvas.getContext('2d');
 
-            // 強制數位裁切變焦 (Digital Crop Zoom up to 120x)
             if (currentZoom > 1.0) {
                 const cropWidth = (video.videoWidth || 1280) / currentZoom;
                 const cropHeight = (video.videoHeight || 720) / currentZoom;
@@ -293,14 +318,12 @@
         }
 
         function handleFileSelect(event) {
-            const apiKey = localStorage.getItem('gemini_api_key');
-            if (!apiKey) { openSettings(); return; }
+            let apiKey = localStorage.getItem('gemini_api_key') || DEFAULT_KEY;
             const file = event.target.files[0];
             if (!file) return;
 
-            document.getElementById('appleEdgeGlow').classList.add('active');
-            document.getElementById('pillText').innerText = '讀取照片中...';
-
+            fullResponseText = "讀取照片中...";
+            document.getElementById('pillText').innerText = fullResponseText;
             const reader = new FileReader();
             reader.onload = function(e) {
                 sendToGemini(e.target.result.split(',')[1], apiKey, null);
@@ -309,43 +332,35 @@
         }
 
         async function sendToGemini(base64Image, apiKey, customPrompt) {
-            const promptText = customPrompt || "請用繁體中文簡短回答（例如：可能是：百香果）";
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${apiKey}`;
+            const promptText = customPrompt || "請用繁體中文詳細回答：這是什麼？";
+            const models = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-flash-lite-latest'];
+            let success = false;
 
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [
-                                { text: promptText },
-                                { inline_data: { mime_type: "image/jpeg", data: base64Image } }
-                            ]
-                        }]
-                    })
-                });
+            for (let model of models) {
+                try {
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: promptText }, { inline_data: { mime_type: "image/jpeg", data: base64Image } }] }]
+                        })
+                    });
 
-                const data = await response.json();
-                document.getElementById('appleEdgeGlow').classList.remove('active');
-
-                if (data.candidates && data.candidates[0].content) {
-                    const text = data.candidates[0].content.parts[0].text;
-                    document.getElementById('pillText').innerText = text;
-                    document.getElementById('pillIcon').innerHTML = `<i class="fa-solid fa-sparkles"></i>`;
-                } else if (data.error) {
-                    document.getElementById('pillText').innerText = '錯誤: ' + data.error.message;
-                    document.getElementById('pillIcon').innerHTML = `<i class="fa-solid fa-circle-exclamation text-amber-400"></i>`;
-                    if (data.error.message.includes('leaked') || data.error.message.includes('invalid')) {
-                        openSettings();
+                    const data = await response.json();
+                    if (data.candidates && data.candidates[0].content) {
+                        fullResponseText = data.candidates[0].content.parts[0].text.replace(/\*/g, '').trim();
+                        document.getElementById('pillText').innerText = fullResponseText.substring(0, 20) + '... (點擊展開)';
+                        document.getElementById('pillIcon').innerHTML = `<i class="fa-solid fa-sparkles"></i>`;
+                        success = true;
+                        break;
                     }
-                } else {
-                    document.getElementById('pillText').innerText = '無法辨識';
-                }
-            } catch (err) {
-                document.getElementById('appleEdgeGlow').classList.remove('active');
-                document.getElementById('pillText').innerText = '連線失敗';
-                console.error(err);
+                } catch (e) { console.log("嘗試失敗"); }
+            }
+
+            if (!success) {
+                fullResponseText = "無法辨識，請檢查 API Key";
+                document.getElementById('pillText').innerText = fullResponseText;
             }
         }
     </script>
