@@ -16,7 +16,7 @@
         body { background-color: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", sans-serif; overflow: hidden; height: 100vh; width: 100vw; position: relative; }
 
         .apple-pill-card {
-            background: rgba(35, 35, 40, 0.82);
+            background: rgba(35, 35, 40, 0.85);
             backdrop-filter: blur(35px) saturate(200%);
             -webkit-backdrop-filter: blur(35px) saturate(200%);
             border: 1px solid rgba(255, 255, 255, 0.28);
@@ -172,7 +172,7 @@
             </div>
             <button onclick="saveSettings()" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl font-semibold text-white shadow-lg">儲存設定</button>
             <div class="text-center pt-2 border-t border-white/10">
-                <span class="text-[11px] text-white/40 tracking-wider">Visual Intelligence v2.7.5 (Build 2026.10)</span>
+                <span class="text-[11px] text-white/40 tracking-wider">Visual Intelligence v2.7.6 (Build 2026.10)</span>
             </div>
         </div>
     </div>
@@ -188,7 +188,6 @@
         let currentZoom = 1.0;
         let isExpanded = false;
         let fullResponseText = "點擊快門開始辨識";
-        let videoDevices = [];
 
         // 變焦刻度：0.5 到 5 之間 (0.5步進)，5 到 120 以 10 為單位
         const zoomSteps = [];
@@ -208,38 +207,25 @@
             zoomTrack.appendChild(div);
         });
 
-        async function initCamera(preferUltraWide = false) {
-            if (currentStream) currentStream.getTracks().forEach(track => track.stop());
+        async function initCamera() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
             try {
-                // 枚舉裝置尋找超廣角鏡頭
-                if (videoDevices.length === 0) {
-                    const devices = await navigator.mediaDevices.enumerateDevices();
-                    videoDevices = devices.filter(d => d.kind === 'videoinput');
-                }
-
-                let constraints = {
+                currentStream = await navigator.mediaDevices.getUserMedia({
                     video: { facingMode: currentFacingMode, width: { ideal: 1920 }, height: { ideal: 1080 } }
-                };
-
-                // 如果點擊 0.5x 且有多鏡頭，嘗試切換至廣角鏡頭 ID
-                if (preferUltraWide && videoDevices.length > 1) {
-                    const wideDevice = videoDevices.find(d => d.label.toLowerCase().includes('ultra') || d.label.toLowerCase().includes('wide') || d.label.toLowerCase().includes('超廣角'));
-                    if (wideDevice) {
-                        constraints.video.deviceId = { exact: wideDevice.deviceId };
-                    }
-                }
-
-                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
-                document.getElementById('cameraStream').srcObject = currentStream;
+                });
+                const videoEl = document.getElementById('cameraStream');
+                videoEl.srcObject = currentStream;
                 applyZoom(currentZoom);
             } catch (err) {
-                console.log("相機啟動退回預設模式:", err);
+                console.log("相機啟動錯誤，嘗試基本權限...", err);
                 try {
-                    currentStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacingMode } });
+                    currentStream = await navigator.mediaDevices.getUserMedia({ video: true });
                     document.getElementById('cameraStream').srcObject = currentStream;
                     applyZoom(currentZoom);
                 } catch (e) {
-                    console.log("無法啟動相機");
+                    console.log("相機完全無法啟動");
                 }
             }
         }
@@ -247,7 +233,7 @@
 
         function toggleCameraFacing() {
             currentFacingMode = (currentFacingMode === "environment") ? "user" : "environment";
-            initCamera(currentZoom === 0.5);
+            initCamera();
         }
 
         function setZoom(zoomVal) {
@@ -257,19 +243,12 @@
                 if (val === zoomVal) ticks[idx].classList.add('active');
                 else ticks[idx].classList.remove('active');
             });
-
-            // 當切換到 0.5x 時，觸發超廣角鏡頭切換
-            if (zoomVal === 0.5) {
-                initCamera(true);
-            } else {
-                applyZoom(zoomVal);
-            }
+            applyZoom(zoomVal);
         }
 
         function applyZoom(zoomVal) {
             const videoEl = document.getElementById('cameraStream');
             if (zoomVal === 0.5) {
-                // 0.5x 廣角顯示縮小視野
                 videoEl.style.transform = `scale(0.85)`;
             } else {
                 videoEl.style.transform = `scale(${zoomVal})`;
@@ -293,11 +272,22 @@
             }
         }
 
-        function openSettings() { document.getElementById('apiKeyInput').value = localStorage.getItem('gemini_api_key'] || ''; document.getElementById('settingsModal').classList.remove('hidden'); }
-        function closeSettings() { document.getElementById('settingsModal').classList.add('hidden'); }
+        function openSettings() {
+            document.getElementById('apiKeyInput').value = localStorage.getItem('gemini_api_key') || '';
+            document.getElementById('settingsModal').classList.remove('hidden');
+        }
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.add('hidden');
+        }
         function saveSettings() {
             const val = document.getElementById('apiKeyInput').value.trim();
-            if (val) { localStorage.setItem('gemini_api_key', val); closeSettings(); alert('已儲存！'); }
+            if (val) {
+                localStorage.setItem('gemini_api_key', val);
+                closeSettings();
+                alert('已儲存設定！');
+            } else {
+                alert('請輸入有效的 API Key');
+            }
         }
 
         function openAskDrawer() { document.getElementById('askDrawer').classList.remove('hidden'); }
@@ -309,7 +299,7 @@
         }
 
         async function captureAndAnalyze(customPrompt = null) {
-            let apiKey = localStorage.getItem('gemini_api_key'] || DEFAULT_KEY;
+            let apiKey = localStorage.getItem('gemini_api_key') || DEFAULT_KEY;
 
             fullResponseText = "分析中...";
             document.getElementById('pillTitle').innerText = fullResponseText;
@@ -337,7 +327,7 @@
         }
 
         function handleFileSelect(event) {
-            let apiKey = localStorage.getItem('gemini_api_key'] || DEFAULT_KEY;
+            let apiKey = localStorage.getItem('gemini_api_key') || DEFAULT_KEY;
             const file = event.target.files[0];
             if (!file) return;
 
@@ -375,13 +365,14 @@
                         success = true;
                         break;
                     }
-                } catch (e) { console.log("嘗試失敗"); }
+                } catch (e) { console.log(`模型 ${model} 嘗試失敗`); }
             }
 
             if (!success) {
-                fullResponseText = "無法辨識，請檢查 API Key";
+                fullResponseText = "無法辨識，請檢查 API Key 或網路連線";
                 document.getElementById('pillTitle').innerText = fullResponseText;
                 document.getElementById('pillFullText').innerText = fullResponseText;
+                document.getElementById('pillIcon').innerHTML = `<i class="fa-solid fa-circle-exclamation text-amber-400"></i>`;
             }
         }
     </script>
