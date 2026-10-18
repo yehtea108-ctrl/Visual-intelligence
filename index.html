@@ -160,7 +160,6 @@
         </div>
     </div>
 
-    <!-- 設定 Modal (含版本號) -->
     <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-2xl flex items-center justify-center p-6">
         <div class="apple-pill-card expanded bg-gray-900/90 w-full max-w-md rounded-3xl p-6 border border-white/20 space-y-4">
             <div class="flex items-center justify-between pb-2 border-b border-white/10">
@@ -173,7 +172,7 @@
             </div>
             <button onclick="saveSettings()" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl font-semibold text-white shadow-lg">儲存設定</button>
             <div class="text-center pt-2 border-t border-white/10">
-                <span class="text-[11px] text-white/40 tracking-wider">Visual Intelligence v2.7.4 (Build 2026.10)</span>
+                <span class="text-[11px] text-white/40 tracking-wider">Visual Intelligence v2.7.5 (Build 2026.10)</span>
             </div>
         </div>
     </div>
@@ -189,8 +188,9 @@
         let currentZoom = 1.0;
         let isExpanded = false;
         let fullResponseText = "點擊快門開始辨識";
+        let videoDevices = [];
 
-        // 動態生成變焦刻度：0.5 到 5 之間所有刻度 (0.5步進)，5 到 120 以 10 為單位
+        // 變焦刻度：0.5 到 5 之間 (0.5步進)，5 到 120 以 10 為單位
         const zoomSteps = [];
         for (let i = 0.5; i <= 5.0; i += 0.5) {
             zoomSteps.push(Number(i.toFixed(1)));
@@ -208,21 +208,46 @@
             zoomTrack.appendChild(div);
         });
 
-        async function initCamera() {
+        async function initCamera(preferUltraWide = false) {
             if (currentStream) currentStream.getTracks().forEach(track => track.stop());
             try {
-                currentStream = await navigator.mediaDevices.getUserMedia({
+                // 枚舉裝置尋找超廣角鏡頭
+                if (videoDevices.length === 0) {
+                    const devices = await navigator.mediaDevices.enumerateDevices();
+                    videoDevices = devices.filter(d => d.kind === 'videoinput');
+                }
+
+                let constraints = {
                     video: { facingMode: currentFacingMode, width: { ideal: 1920 }, height: { ideal: 1080 } }
-                });
+                };
+
+                // 如果點擊 0.5x 且有多鏡頭，嘗試切換至廣角鏡頭 ID
+                if (preferUltraWide && videoDevices.length > 1) {
+                    const wideDevice = videoDevices.find(d => d.label.toLowerCase().includes('ultra') || d.label.toLowerCase().includes('wide') || d.label.toLowerCase().includes('超廣角'));
+                    if (wideDevice) {
+                        constraints.video.deviceId = { exact: wideDevice.deviceId };
+                    }
+                }
+
+                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
                 document.getElementById('cameraStream').srcObject = currentStream;
                 applyZoom(currentZoom);
-            } catch (err) { console.log("相機啟動失敗"); }
+            } catch (err) {
+                console.log("相機啟動退回預設模式:", err);
+                try {
+                    currentStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacingMode } });
+                    document.getElementById('cameraStream').srcObject = currentStream;
+                    applyZoom(currentZoom);
+                } catch (e) {
+                    console.log("無法啟動相機");
+                }
+            }
         }
         initCamera();
 
         function toggleCameraFacing() {
             currentFacingMode = (currentFacingMode === "environment") ? "user" : "environment";
-            initCamera();
+            initCamera(currentZoom === 0.5);
         }
 
         function setZoom(zoomVal) {
@@ -232,12 +257,23 @@
                 if (val === zoomVal) ticks[idx].classList.add('active');
                 else ticks[idx].classList.remove('active');
             });
-            applyZoom(zoomVal);
+
+            // 當切換到 0.5x 時，觸發超廣角鏡頭切換
+            if (zoomVal === 0.5) {
+                initCamera(true);
+            } else {
+                applyZoom(zoomVal);
+            }
         }
 
         function applyZoom(zoomVal) {
             const videoEl = document.getElementById('cameraStream');
-            videoEl.style.transform = `scale(${zoomVal})`;
+            if (zoomVal === 0.5) {
+                // 0.5x 廣角顯示縮小視野
+                videoEl.style.transform = `scale(0.85)`;
+            } else {
+                videoEl.style.transform = `scale(${zoomVal})`;
+            }
         }
 
         function toggleExpandPill() {
@@ -257,7 +293,7 @@
             }
         }
 
-        function openSettings() { document.getElementById('apiKeyInput').value = localStorage.getItem('gemini_api_key') || ''; document.getElementById('settingsModal').classList.remove('hidden'); }
+        function openSettings() { document.getElementById('apiKeyInput').value = localStorage.getItem('gemini_api_key'] || ''; document.getElementById('settingsModal').classList.remove('hidden'); }
         function closeSettings() { document.getElementById('settingsModal').classList.add('hidden'); }
         function saveSettings() {
             const val = document.getElementById('apiKeyInput').value.trim();
@@ -273,7 +309,7 @@
         }
 
         async function captureAndAnalyze(customPrompt = null) {
-            let apiKey = localStorage.getItem('gemini_api_key') || DEFAULT_KEY;
+            let apiKey = localStorage.getItem('gemini_api_key'] || DEFAULT_KEY;
 
             fullResponseText = "分析中...";
             document.getElementById('pillTitle').innerText = fullResponseText;
@@ -301,7 +337,7 @@
         }
 
         function handleFileSelect(event) {
-            let apiKey = localStorage.getItem('gemini_api_key') || DEFAULT_KEY;
+            let apiKey = localStorage.getItem('gemini_api_key'] || DEFAULT_KEY;
             const file = event.target.files[0];
             if (!file) return;
 
